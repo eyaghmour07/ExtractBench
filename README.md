@@ -65,6 +65,14 @@ uv run python scripts/run_benchmark.py --pipelines tesseract,easyocr,vlm --n 50
 
 Writes `data/runs/` (gitignored) and copies the table to `results/`.
 
+Live bench UI (upload, run, leaderboard, failure gallery):
+
+```bash
+uv run python scripts/serve.py
+```
+
+Open http://127.0.0.1:8765. Gemini is skipped unless `GEMINI_API_KEY` is set in `.env`. Unlabeled uploads extract only; they do not enter the leaderboard.
+
 ## What the numbers mean
 
 | Number | Meaning |

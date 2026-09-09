@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ExtractBench</title>
+    <link rel="preconnect" href="https://fonts.bunny.net" />
+    <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700|jetbrains-mono:400,500,600" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      body { font-size: 14px; }
+      h1 { font-size: 2rem; }
+      .brand h1 { font-size: 0.9375rem; }
+      h2 { font-size: 1.25rem; }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="accent"></div>
+      <div class="top-inner">
+        <div class="brand">
+          <span class="mark" aria-hidden="true">E</span>
+          <div>
+            <h1>ExtractBench</h1>
+            <p class="brand-meta">50 labeled SROIE receipts, seed 42</p>
+          </div>
+        </div>
+        <nav class="tabs" aria-label="Views">
+          <button type="button" class="tab is-active" data-view="leaderboard">Leaderboard</button>
+          <button type="button" class="tab" data-view="gallery">Failure gallery</button>
+        </nav>
+        <form class="run-form" id="run-form">
+          <label class="switch"><input type="checkbox" name="pipe" value="tesseract" checked /> Tesseract</label>
+          <label class="switch"><input type="checkbox" name="pipe" value="easyocr" /> EasyOCR</label>
+          <label class="switch"><input type="checkbox" name="pipe" value="vlm" id="pipe-vlm" /> Gemini</label>
+          <label class="count">n <input id="sample-count" type="number" min="1" step="1" value="8" /></label>
+          <button type="submit" class="run" id="run-btn">Run scan</button>
+        </form>
+      </div>
+    </header>
+
+    <main>
+      <section id="view-leaderboard" class="page">
+        <h2>Leaderboard</h2>
+        <div class="summary" id="summary"></div>
+        <div class="board">
+          <table class="methods" id="methods">
+            <thead>
+              <tr>
+                <th scope="col">Method</th>
+                <th scope="col">P</th>
+                <th scope="col">R</th>
+                <th scope="col">CER</th>
+                <th scope="col">Latency</th>
+                <th scope="col">Merchant</th>
+                <th scope="col">Date</th>
+                <th scope="col">Total</th>
+              </tr>
+            </thead>
+            <tbody id="methods-body">
+              <tr>
+                <td colspan="8" class="empty-cell">No scored run yet. Pick samples and run a scan.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="method-note" id="warnings" hidden></p>
+        <p class="method-note">
+          Accuracy is exact match after field normalization. CER is mean Levenshtein on casefolded strings.
+          Latency is wall-clock per document. OCR is text plus a parser. Gemini reads the image.
+        </p>
+      </section>
+
+      <section id="view-gallery" class="page" hidden>
+        <h2>Failure gallery</h2>
+        <div class="receipt-tabs" id="receipt-tabs"></div>
+        <div class="gallery-grid">
+          <aside class="gallery-side">
+            <div class="photo-well" id="photo-well">
+              <p class="empty" id="stage-empty">Select a receipt to inspect.</p>
+              <div class="stage-frame" id="stage-frame" hidden>
+                <div class="scan-line" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="meta-card" id="meta-card"></div>
+            <div class="score-card" id="score-card"></div>
+          </aside>
+          <div class="compare-wrap">
+            <table class="compare" id="compare">
+              <thead>
+                <tr>
+                  <th scope="col">Field</th>
+                  <th scope="col">Tesseract</th>
+                  <th scope="col">EasyOCR</th>
+                  <th scope="col">Gemini</th>
+                </tr>
+              </thead>
+              <tbody id="compare-body">
+                <tr>
+                  <th scope="row">Merchant</th>
+                  <td colspan="3" class="empty-cell">Select a sample to compare fields.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <input id="upload" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" />
+        <p class="method-note">
+          <button type="button" class="text-btn" id="select-visible">Select counted samples</button>
+          <button type="button" class="text-btn" id="select-none">Clear selection</button>
+          <label class="text-btn file-btn">Add image<input id="upload-alias" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+        </p>
+      </section>
+    </main>
+
+    <footer class="status" id="status">Ready.</footer>
+    <script src="/app.js"></script>
+  </body>
+</html>
