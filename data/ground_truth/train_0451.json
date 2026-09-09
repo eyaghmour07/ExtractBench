@@ -1,0 +1,18 @@
+{
+  "id": "train_0451",
+  "source": "sroie",
+  "image": "data/receipts/train_0451.jpg",
+  "fields": {
+    "merchant": "MR. D.I.Y. (M) SDN BHD",
+    "date": "30-04-18",
+    "total": "5.00"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "MR. D.I.Y. (M) SDN BHD",
+    "date": "30-04-18",
+    "total": "5.00"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

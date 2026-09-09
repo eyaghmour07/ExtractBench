@@ -1,0 +1,18 @@
+{
+  "id": "train_0380",
+  "source": "sroie",
+  "image": "data/receipts/train_0380.jpg",
+  "fields": {
+    "merchant": "99 SPEED MART S/B",
+    "date": "14-12-16",
+    "total": "61.65"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "99 SPEED MART S/B",
+    "date": "14-12-16",
+    "total": "61.65"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

@@ -1,0 +1,30 @@
+[project]
+name = "extraction"
+version = "0.1.0"
+description = "Benchmark classical OCR, modern OCR, and a vision-language model on receipt field extraction."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "datasets>=3.0.0",
+    "easyocr>=1.7.2",
+    "google-genai>=1.0.0",
+    "pillow>=11.0.0",
+    "pydantic>=2.10.0",
+    "python-dateutil>=2.9.0",
+    "python-levenshtein>=0.26.0",
+    "pytesseract>=0.3.13",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,18 @@
+{
+  "id": "train_0566",
+  "source": "sroie",
+  "image": "data/receipts/train_0566.jpg",
+  "fields": {
+    "merchant": "RESTORAN WAN SHENG",
+    "date": "04-06-2018",
+    "total": "6.70"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "RESTORAN WAN SHENG",
+    "date": "04-06-2018",
+    "total": "6.70"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

@@ -1,0 +1,18 @@
+{
+  "id": "train_0062",
+  "source": "sroie",
+  "image": "data/receipts/train_0062.jpg",
+  "fields": {
+    "merchant": "99 SPEED MART S/B",
+    "date": "19-03-18",
+    "total": "11.40"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "99 SPEED MART S/B",
+    "date": "19-03-18",
+    "total": "11.40"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

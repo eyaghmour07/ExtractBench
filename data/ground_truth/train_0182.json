@@ -1,0 +1,18 @@
+{
+  "id": "train_0182",
+  "source": "sroie",
+  "image": "data/receipts/train_0182.jpg",
+  "fields": {
+    "merchant": "BILLION SIX ENTERPRISE",
+    "date": "22/02/2018",
+    "total": "63.80"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "BILLION SIX ENTERPRISE",
+    "date": "22/02/2018",
+    "total": "63.80"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

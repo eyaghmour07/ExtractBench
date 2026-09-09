@@ -1,0 +1,18 @@
+{
+  "id": "train_0241",
+  "source": "sroie",
+  "image": "data/receipts/train_0241.jpg",
+  "fields": {
+    "merchant": "BEMED (SP) SDN. BHD.",
+    "date": "25/FEB/2017",
+    "total": "217.00"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "BEMED (SP) SDN. BHD.",
+    "date": "25/FEB/2017",
+    "total": "217.00"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

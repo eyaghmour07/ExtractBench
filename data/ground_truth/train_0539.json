@@ -1,0 +1,18 @@
+{
+  "id": "train_0539",
+  "source": "sroie",
+  "image": "data/receipts/train_0539.jpg",
+  "fields": {
+    "merchant": "GERBANG ALAF RESTAURANTS SDN BHD",
+    "date": "24/06/2018",
+    "total": "12.80"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "GERBANG ALAF RESTAURANTS SDN BHD",
+    "date": "24/06/2018",
+    "total": "12.80"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

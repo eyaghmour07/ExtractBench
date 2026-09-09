@@ -1,0 +1,20 @@
+{
+  "id": "train_0414",
+  "source": "sroie",
+  "image": "data/receipts/train_0414.jpg",
+  "fields": {
+    "merchant": "KEDAI UBAT DAN RUNCIT CHONG HWA",
+    "date": "OCT 3, 2016",
+    "total": "RM33.90"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "KEDAI UHAT DAN RUNCIT CHONG HWA",
+    "date": "OCT 3, 2016",
+    "total": "RM33.90"
+  },
+  "notes": "corrected SROIE draft typo UHAT->UBAT from image",
+  "corrections": [
+    "merchant: 'KEDAI UHAT DAN RUNCIT CHONG HWA' -> 'KEDAI UBAT DAN RUNCIT CHONG HWA'"
+  ]
+}

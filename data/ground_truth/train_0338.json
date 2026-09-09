@@ -1,0 +1,18 @@
+{
+  "id": "train_0338",
+  "source": "sroie",
+  "image": "data/receipts/train_0338.jpg",
+  "fields": {
+    "merchant": "GARDENIA BAKERIES (KL) SDN BHD",
+    "date": "19/08/2017",
+    "total": "50.60"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "GARDENIA BAKERIES (KL) SDN BHD",
+    "date": "19/08/2017",
+    "total": "50.60"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

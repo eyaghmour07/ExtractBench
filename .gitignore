@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.swp
+
+# Receipt images and pipeline run artifacts (labels are committed)
+data/receipts/*
+!data/receipts/.gitkeep
+data/runs/*
+!data/runs/.gitkeep
+
+# EasyOCR / torch caches if someone points them here
+.EasyOCR/
+.cache/

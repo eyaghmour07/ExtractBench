@@ -1,0 +1,10 @@
+{
+  "id": "train_0414",
+  "dataset_index": 414,
+  "fields": {
+    "merchant": "KEDAI UHAT DAN RUNCIT CHONG HWA",
+    "date": "OCT 3, 2016",
+    "total": "RM33.90"
+  },
+  "address_ignored": "3, JALAN PERDANA 5, TAMAN INDAH PERDANA, KEPONG, 52100 KL."
+}

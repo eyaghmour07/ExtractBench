@@ -1,0 +1,18 @@
+{
+  "id": "train_0147",
+  "source": "sroie",
+  "image": "data/receipts/train_0147.jpg",
+  "fields": {
+    "merchant": "MIZU MENTAI SDN. BHD.",
+    "date": "31-03-2018",
+    "total": "65.55"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "MIZU MENTAI SDN. BHD.",
+    "date": "31-03-2018",
+    "total": "65.55"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

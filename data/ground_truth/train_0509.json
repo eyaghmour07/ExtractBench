@@ -1,0 +1,18 @@
+{
+  "id": "train_0509",
+  "source": "sroie",
+  "image": "data/receipts/train_0509.jpg",
+  "fields": {
+    "merchant": "AIK HUAT HARDWARE ENTERPRISE (SETIA ALAM) SDN BHD",
+    "date": "12/09/2017",
+    "total": "30.00"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "AIK HUAT HARDWARE ENTERPRISE (SETIA ALAM) SDN BHD",
+    "date": "12/09/2017",
+    "total": "30.00"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

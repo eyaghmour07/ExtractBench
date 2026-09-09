@@ -1,0 +1,18 @@
+{
+  "id": "train_0621",
+  "source": "sroie",
+  "image": "data/receipts/train_0621.jpg",
+  "fields": {
+    "merchant": "ONE ONE THREE SEAFOOD RESTAURANT SDN BHD",
+    "date": "15-06-2018",
+    "total": "148.50"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "ONE ONE THREE SEAFOOD RESTAURANT SDN BHD",
+    "date": "15-06-2018",
+    "total": "148.50"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

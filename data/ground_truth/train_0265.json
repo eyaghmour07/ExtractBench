@@ -1,0 +1,18 @@
+{
+  "id": "train_0265",
+  "source": "sroie",
+  "image": "data/receipts/train_0265.jpg",
+  "fields": {
+    "merchant": "BROADVIEW MARKETING SDN BHD",
+    "date": "15/05/2017",
+    "total": "4.70"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "BROADVIEW MARKETING SDN BHD",
+    "date": "15/05/2017",
+    "total": "4.70"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

@@ -1,0 +1,18 @@
+{
+  "id": "train_0128",
+  "source": "sroie",
+  "image": "data/receipts/train_0128.jpg",
+  "fields": {
+    "merchant": "SYARIKAT PERNIAGAAN GIN KEE",
+    "date": "31/01/2018",
+    "total": "82.68"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "SYARIKAT PERNIAGAAN GIN KEE",
+    "date": "31/01/2018",
+    "total": "82.68"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

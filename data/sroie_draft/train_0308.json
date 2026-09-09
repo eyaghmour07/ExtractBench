@@ -1,0 +1,10 @@
+{
+  "id": "train_0308",
+  "dataset_index": 308,
+  "fields": {
+    "merchant": "AEON CO. (M) BHD",
+    "date": "12/04/2018",
+    "total": "4.40"
+  },
+  "address_ignored": "3RD FLR, AEON TAMAN MALURI SC JLN JEJAKA, TAMAN MALURI CHERAS, 55100 KUALA LUMPUR"
+}

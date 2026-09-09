@@ -1,0 +1,18 @@
+{
+  "id": "train_0008",
+  "source": "sroie",
+  "image": "data/receipts/train_0008.jpg",
+  "fields": {
+    "merchant": "PERNIAGAAN ZHENG HUI",
+    "date": "12/02/2018",
+    "total": "112.45"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "PERNIAGAAN ZHENG HUI",
+    "date": "12/02/2018",
+    "total": "112.45"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

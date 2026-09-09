@@ -1,0 +1,18 @@
+{
+  "id": "train_0132",
+  "source": "sroie",
+  "image": "data/receipts/train_0132.jpg",
+  "fields": {
+    "merchant": "FARMASI MALURI S/B",
+    "date": "02/03/18",
+    "total": "79.35"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "FARMASI MALURI S/B",
+    "date": "02/03/18",
+    "total": "79.35"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

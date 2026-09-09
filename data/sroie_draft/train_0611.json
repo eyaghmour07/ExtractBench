@@ -1,0 +1,10 @@
+{
+  "id": "train_0611",
+  "dataset_index": 611,
+  "fields": {
+    "merchant": "AMTECH ELECTRICAL SUPPLIES",
+    "date": "27/06/18",
+    "total": "136.00"
+  },
+  "address_ignored": "107,JALAN BANDAR RAWANG 2, PUSAT BANDAR RAWANG, 48000 RAWANG,SELANGOR D E"
+}

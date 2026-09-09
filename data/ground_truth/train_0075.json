@@ -1,0 +1,18 @@
+{
+  "id": "train_0075",
+  "source": "sroie",
+  "image": "data/receipts/train_0075.jpg",
+  "fields": {
+    "merchant": "LIAN HING STATIONERY SDN BHD",
+    "date": "30/03/2018",
+    "total": "159.00"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "LIAN HING STATIONERY SDN BHD",
+    "date": "30/03/2018",
+    "total": "159.00"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

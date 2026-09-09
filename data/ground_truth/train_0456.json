@@ -1,0 +1,18 @@
+{
+  "id": "train_0456",
+  "source": "sroie",
+  "image": "data/receipts/train_0456.jpg",
+  "fields": {
+    "merchant": "ENW HARDWARE CENTRE (M) SDN. BHD.",
+    "date": "09/04/2018",
+    "total": "51.00"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "ENW HARDWARE CENTRE (M) SDN. BHD.",
+    "date": "09/04/2018",
+    "total": "51.00"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}

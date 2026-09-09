@@ -1,0 +1,18 @@
+{
+  "id": "train_0087",
+  "source": "sroie",
+  "image": "data/receipts/train_0087.jpg",
+  "fields": {
+    "merchant": "IKANO HANDEL SDN BHD",
+    "date": "27/07/17",
+    "total": "538.00"
+  },
+  "verified": true,
+  "sroie_draft": {
+    "merchant": "IKANO HANDEL SDN BHD",
+    "date": "27/07/17",
+    "total": "538.00"
+  },
+  "notes": "spot-checked against receipt image",
+  "corrections": []
+}
