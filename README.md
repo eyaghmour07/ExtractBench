@@ -1,4 +1,4 @@
-# Receipt extraction benchmark
+# ExtractBench
 
 Compare **Tesseract**, **EasyOCR**, and a **Gemini** vision-language model on the same hand-labeled receipts. The referee is ground truth verified from the image — never a pipeline output, and never an unverified SROIE JSON dump.
 

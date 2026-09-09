@@ -1,4 +1,4 @@
-"""Receipt field-extraction benchmark: OCR vs VLM, scored against hand-verified labels."""
+"""ExtractBench: OCR vs VLM receipt field extraction, scored against hand-verified labels."""
 
 from extraction.schema import GroundTruthRecord, PipelineRun, ReceiptFields
 

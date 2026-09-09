@@ -1,6 +1,4 @@
-# Document Extraction Benchmark — Product Requirements Document
-
-*(working title — name it once the core pipeline is real)*
+# ExtractBench — Product Requirements Document
 
 ## The point of this project
 
