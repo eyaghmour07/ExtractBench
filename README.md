@@ -28,9 +28,25 @@ One SROIE draft was wrong on the image and was corrected: `train_0414` merchant 
 
 Two more sets share the same engines and scoring. Their leaderboards never mix into the locked SROIE table.
 
-**Personal receipts** — same merchant / date / total fields. Upload your own images, label them from the picture, then scan. Unlabeled uploads extract only.
+**Personal receipts** — same merchant / date / total fields. Upload your own images, or seed a second receipt board that never overlaps the locked 50:
 
-**FUNSD forms** — `title`, `date`, `reference`. Frozen 10-id slice ([nielsr/funsd-layoutlmv3](https://huggingface.co/datasets/nielsr/funsd-layoutlmv3), seed 42), labels written from the images. A first Tesseract pass is **0% exact-match** ([results/funsd_leaderboard.md](results/funsd_leaderboard.md)). The receipt parser does not transfer; that is the generalization result.
+```bash
+uv run python scripts/download_personal.py --n 5   # seed 42, ids 51–55
+uv run python scripts/label.py --dataset personal
+uv run python scripts/run_benchmark.py --dataset personal --pipelines tesseract,easyocr,vlm
+```
+
+Five extra SROIE images are labeled from the picture and live in `data/personal/`. Unlabeled uploads still extract only. Latest 5-doc readout ([results/personal_leaderboard.md](results/personal_leaderboard.md)): Gemini **93.3%** P/R, Tesseract/EasyOCR **26.7%** recall.
+
+**FUNSD forms** — `title`, `date`, `reference`. Frozen 10-id slice ([nielsr/funsd-layoutlmv3](https://huggingface.co/datasets/nielsr/funsd-layoutlmv3), seed 42), labels written from the images.
+
+| Pipeline | Macro P | Macro R | Macro CER | Latency mean (s) |
+| --- | ---: | ---: | ---: | ---: |
+| tesseract | 0.0% | 0.0% | 0.955 | 0.347 |
+| easyocr | 11.1% | 3.7% | 0.776 | 3.509 |
+| vlm-gemini | 85.2% | 80.5% | 0.325 | 8.595 |
+
+The receipt parser does not transfer. Gemini still leads, mostly by reading titles and dates; reference numbers are where it drops (Bates stamps vs form ids). Full table: [results/funsd_leaderboard.md](results/funsd_leaderboard.md).
 
 ```bash
 uv run python scripts/download_funsd.py --n 10
@@ -48,6 +64,12 @@ uv run python scripts/serve.py
 Open http://127.0.0.1:8765.
 
 The bench lets you switch SROIE / personal / forms, pick pipelines, and watch a scan fill the leaderboard and failure gallery as each document finishes. Clicking a miss shows the image next to every engine’s prediction and the hand label — that is the only way to see brand-vs-legal-name errors, a 20.80 vs 20.90 total, or a form title the receipt parser never finds. Personal receipts are labeled in the same view, so the referee stays tied to the image instead of a JSON file you never opened.
+
+![SROIE leaderboard](docs/screenshots/sroie-leaderboard.png)
+
+![FUNSD failure gallery](docs/screenshots/gallery.png)
+
+![Personal receipts leaderboard](docs/screenshots/personal-leaderboard.png)
 
 Gemini is skipped unless `GEMINI_API_KEY` is set in `.env`.
 

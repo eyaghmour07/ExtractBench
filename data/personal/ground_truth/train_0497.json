@@ -1,0 +1,18 @@
+{
+  "id": "train_0497",
+  "source": "personal",
+  "doc_type": "receipt",
+  "image": "data/personal/images/train_0497.jpg",
+  "fields": {
+    "merchant": "SANYU STATIONERY SHOP",
+    "date": "08/07/2017",
+    "total": "8.70",
+    "title": null,
+    "reference": null
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": null,
+  "notes": "labeled from the receipt image",
+  "corrections": []
+}

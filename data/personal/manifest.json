@@ -1,0 +1,13 @@
+{
+  "dataset": "personal",
+  "split": "live",
+  "seed": 42,
+  "ids": [
+    "train_0317",
+    "train_0014",
+    "train_0487",
+    "train_0497",
+    "train_0168"
+  ],
+  "doc_type": "receipt"
+}

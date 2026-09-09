@@ -95,7 +95,18 @@ function fieldLabel(name) {
   return (currentSpec().labels || DEFAULT_LABELS)[name] || name;
 }
 
+function applyView(view) {
+  state.view = view === "gallery" ? "gallery" : "leaderboard";
+  document.querySelectorAll(".tab").forEach((el) =>
+    el.classList.toggle("is-active", el.dataset.view === state.view)
+  );
+  els.viewLeaderboard.hidden = state.view !== "leaderboard";
+  els.viewGallery.hidden = state.view !== "gallery";
+}
+
 async function boot() {
+  const params = new URLSearchParams(location.search);
+  state.dataset = params.get("dataset") || "sroie";
   const healthRes = await fetch("/api/health");
   const health = await healthRes.json();
   state.datasets = health.datasets || [];
@@ -105,6 +116,13 @@ async function boot() {
   }
   renderDatasetNav();
   await loadDataset(state.dataset, { keepSelection: false });
+  const focus = params.get("id");
+  if (focus && state.receipts.some((row) => row.id === focus)) {
+    state.currentId = focus;
+    state.selected.add(focus);
+    renderAll();
+  }
+  applyView(params.get("view") || "leaderboard");
 }
 
 async function loadDataset(datasetId, { keepSelection } = {}) {
@@ -445,12 +463,7 @@ function upsertSummary(summary) {
 }
 
 document.querySelectorAll(".tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    state.view = tab.dataset.view;
-    document.querySelectorAll(".tab").forEach((el) => el.classList.toggle("is-active", el === tab));
-    els.viewLeaderboard.hidden = state.view !== "leaderboard";
-    els.viewGallery.hidden = state.view !== "gallery";
-  });
+  tab.addEventListener("click", () => applyView(tab.dataset.view));
 });
 
 els.form.addEventListener("submit", async (event) => {

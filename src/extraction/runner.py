@@ -98,10 +98,10 @@ def load_summaries(dataset_id: str = "sroie") -> list[dict]:
     if rows:
         return sorted(rows, key=lambda row: ORDER.index(row["pipeline"]) if row["pipeline"] in ORDER else 99)
     if spec.id == "sroie":
-        legacy = list(RUNS.glob("*_summary.json"))
-        if legacy:
+        legacy = [_public(json.loads(path.read_text())) for path in RUNS.glob("*_summary.json")]
+        if legacy and all(row.get("n_documents") == 50 for row in legacy):
             return sorted(
-                [_public(json.loads(path.read_text())) for path in legacy],
+                legacy,
                 key=lambda row: ORDER.index(row["pipeline"]) if row["pipeline"] in ORDER else 99,
             )
         return _baseline()
