@@ -7,7 +7,7 @@ from pathlib import Path
 import pytesseract
 from PIL import Image
 
-from extraction.parse import parse_receipt_text
+from extraction.parse import parse_document
 from extraction.schema import PipelineRun, ReceiptFields
 
 
@@ -19,12 +19,12 @@ class TesseractPipeline:
         if cmd:
             pytesseract.pytesseract.tesseract_cmd = cmd
 
-    def extract(self, image_path: Path, receipt_id: str) -> PipelineRun:
+    def extract(self, image_path: Path, receipt_id: str, doc_type: str = "receipt") -> PipelineRun:
         started = time.perf_counter()
         try:
             with Image.open(image_path) as image:
                 raw = pytesseract.image_to_string(image)
-            fields = parse_receipt_text(raw)
+            fields = parse_document(raw, doc_type)
             error = None
         except Exception as exc:  # noqa: BLE001 — surface engine failures in the run record
             raw = None

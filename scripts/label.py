@@ -27,8 +27,9 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from extraction.catalog import get_dataset  # noqa: E402
 from extraction.ground_truth import load_manifest, save_record  # noqa: E402
-from extraction.paths import GROUND_TRUTH, RECEIPTS, SROIE_DRAFT  # noqa: E402
+from extraction.paths import GROUND_TRUTH, RECEIPTS, ROOT as REPO_ROOT, SROIE_DRAFT  # noqa: E402
 from extraction.schema import GroundTruthRecord, ReceiptFields  # noqa: E402
 
 
@@ -37,15 +38,33 @@ def main() -> None:
     parser.add_argument("--id", dest="only_id", help="Label a single receipt")
     parser.add_argument("--write-verified", metavar="ID", help="Write a verified record without prompts")
     parser.add_argument("--from-draft", action="store_true", help="With --write-verified, copy draft fields")
+    parser.add_argument("--dataset", default="sroie", help="sroie, personal, or funsd")
     parser.add_argument("--merchant")
     parser.add_argument("--date")
     parser.add_argument("--total")
+    parser.add_argument("--title")
+    parser.add_argument("--reference")
     parser.add_argument("--notes")
     parser.add_argument("--no-open", action="store_true", help="Do not open the image in Preview")
     args = parser.parse_args()
 
     if args.write_verified:
         _write_verified(args)
+        return
+
+    spec = get_dataset(args.dataset)
+    if args.dataset != "sroie":
+        if not spec.manifest_path.exists():
+            raise SystemExit(f"No manifest for {spec.id}. {spec.download_hint}")
+        ids = [args.only_id] if args.only_id else load_manifest(spec.manifest_path).ids
+        for receipt_id in ids:
+            existing = spec.gt_dir / f"{receipt_id}.json"
+            if existing.exists():
+                record = GroundTruthRecord.model_validate_json(existing.read_text())
+                if record.verified:
+                    print(f"skip {receipt_id}: already verified")
+                    continue
+            _label_generic(spec, receipt_id, open_image=not args.no_open)
         return
 
     ids = [args.only_id] if args.only_id else load_manifest().ids
@@ -66,7 +85,98 @@ def _load_draft(receipt_id: str) -> dict:
     return json.loads(path.read_text())
 
 
+def _label_generic(spec, receipt_id: str, open_image: bool) -> None:
+    image_path = None
+    for suffix in (".jpg", ".jpeg", ".png", ".webp"):
+        candidate = spec.images_dir / f"{receipt_id}{suffix}"
+        if candidate.exists():
+            image_path = candidate
+            break
+    if image_path is None:
+        raise SystemExit(f"Missing image for {receipt_id} in {spec.images_dir}")
+    draft_path = spec.gt_dir.parent / "draft" / f"{receipt_id}.json"
+    draft_fields = ReceiptFields()
+    if spec.id == "funsd" and draft_path.exists():
+        draft_fields = ReceiptFields.model_validate(json.loads(draft_path.read_text())["fields"])
+    print("\n" + "=" * 60)
+    print(f"{spec.display} {receipt_id}")
+    print(f"Image: {image_path}")
+    print("Draft (not ground truth until you accept/edit):")
+    for name in spec.fields:
+        print(f"  {name}: {getattr(draft_fields, name)}")
+    if open_image:
+        _open_image(image_path)
+    choice = input("[a]ccept draft  [e]dit  [s]kip  [q]uit > ").strip().lower()
+    if choice in {"q", "quit"}:
+        raise SystemExit(0)
+    if choice in {"s", "skip", ""}:
+        print("skipped (still unverified)")
+        return
+    fields = draft_fields.model_copy()
+    notes = None
+    if choice in {"e", "edit"}:
+        for name in spec.fields:
+            setattr(fields, name, _prompt(name, getattr(fields, name)))
+        notes = input("notes (optional) > ").strip() or None
+    elif choice not in {"a", "accept"}:
+        print(f"unknown choice {choice!r}; skipped")
+        return
+    try:
+        image_rel = str(image_path.relative_to(REPO_ROOT))
+    except ValueError:
+        image_rel = str(image_path)
+    save_record(
+        GroundTruthRecord(
+            id=receipt_id,
+            source=spec.id,
+            doc_type=spec.doc_type,
+            image=image_rel,
+            fields=fields,
+            verified=True,
+            draft=draft_fields,
+            notes=notes,
+            corrections=_diff_corrections(draft_fields, fields, spec.fields),
+        ),
+        spec.gt_dir,
+    )
+    print(f"saved verified label for {receipt_id}")
+
+
 def _write_verified(args: argparse.Namespace) -> None:
+    if args.dataset != "sroie":
+        spec = get_dataset(args.dataset)
+        values = {
+            "merchant": args.merchant,
+            "date": args.date,
+            "total": args.total,
+            "title": args.title,
+            "reference": args.reference,
+        }
+        fields = ReceiptFields.model_validate({name: values.get(name) for name in spec.fields})
+        if spec.doc_type == "receipt" and any(getattr(fields, name) is None for name in spec.fields):
+            raise SystemExit(f"--write-verified for {spec.id} requires {', '.join('--' + n for n in spec.fields)}")
+        image_path = next(
+            (spec.images_dir / f"{args.write_verified}{suffix}"
+             for suffix in (".jpg", ".jpeg", ".png", ".webp")
+             if (spec.images_dir / f"{args.write_verified}{suffix}").exists()),
+            None,
+        )
+        if image_path is None:
+            raise SystemExit(f"Missing image for {args.write_verified}")
+        save_record(
+            GroundTruthRecord(
+                id=args.write_verified,
+                source=spec.id,
+                doc_type=spec.doc_type,
+                image=str(image_path.relative_to(REPO_ROOT)),
+                fields=fields,
+                verified=True,
+                notes=args.notes,
+            ),
+            spec.gt_dir,
+        )
+        print(f"verified {args.write_verified} -> {spec.gt_dir / (args.write_verified + '.json')}")
+        return
     receipt_id = args.write_verified
     draft = _load_draft(receipt_id)
     draft_fields = ReceiptFields.model_validate(draft["fields"])
@@ -151,9 +261,13 @@ def _prompt(name: str, current: str | None) -> str | None:
     return typed
 
 
-def _diff_corrections(draft: ReceiptFields, final: ReceiptFields) -> list[str]:
+def _diff_corrections(
+    draft: ReceiptFields,
+    final: ReceiptFields,
+    field_names: tuple[str, ...] = ("merchant", "date", "total"),
+) -> list[str]:
     notes: list[str] = []
-    for name in ("merchant", "date", "total"):
+    for name in field_names:
         before = getattr(draft, name)
         after = getattr(final, name)
         if before != after:

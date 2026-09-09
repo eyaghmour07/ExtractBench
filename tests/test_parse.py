@@ -1,4 +1,4 @@
-from extraction.parse import parse_receipt_text
+from extraction.parse import parse_document, parse_form_text, parse_receipt_text
 
 
 STARBUCKS = """
@@ -77,3 +77,28 @@ def test_empty_text():
     assert fields.merchant is None
     assert fields.date is None
     assert fields.total is None
+
+
+FORM = """
+DEPARTMENT OF HEALTH
+APPLICATION FOR LICENSE
+Form No. 4412-A
+DATE: 14/03/1986
+NAME OF APPLICANT
+"""
+
+
+def test_form_parser_title_date_reference():
+    fields = parse_form_text(FORM)
+    assert fields.title and "DEPARTMENT OF HEALTH" in fields.title.upper()
+    assert fields.date == "14/03/1986"
+    assert fields.reference == "4412-A"
+    assert fields.merchant is None
+    assert fields.total is None
+
+
+def test_parse_document_dispatches():
+    receipt = parse_document(STARBUCKS, "receipt")
+    form = parse_document(FORM, "form")
+    assert receipt.merchant and "STARBUCKS" in receipt.merchant.upper()
+    assert form.title and "DEPARTMENT" in form.title.upper()

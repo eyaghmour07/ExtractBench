@@ -1,0 +1,26 @@
+{
+  "id": "form_0132",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0132.jpg",
+  "fields": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "MAVERICK SPECIALS - PROGRESS REPORT",
+    "reference": null
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "SUBMISSION DATE",
+    "reference": null
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'SUBMISSION DATE' -> 'MAVERICK SPECIALS - PROGRESS REPORT'"
+  ]
+}

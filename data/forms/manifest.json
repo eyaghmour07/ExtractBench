@@ -1,0 +1,18 @@
+{
+  "dataset": "nielsr/funsd-layoutlmv3",
+  "split": "train",
+  "seed": 42,
+  "ids": [
+    "form_0130",
+    "form_0030",
+    "form_0040",
+    "form_0125",
+    "form_0018",
+    "form_0127",
+    "form_0132",
+    "form_0116",
+    "form_0064",
+    "form_0032"
+  ],
+  "doc_type": "form"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "form_0127",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0127.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "June 3, 1995",
+    "total": null,
+    "title": "SPECIAL EVENT INFORMATION SHEET",
+    "reference": "3056"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": "June 3, 1995",
+    "total": null,
+    "title": "HOURS:",
+    "reference": "1995"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'HOURS:' -> 'SPECIAL EVENT INFORMATION SHEET'",
+    "reference: '1995' -> '3056'"
+  ]
+}

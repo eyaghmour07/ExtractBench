@@ -1,0 +1,27 @@
+{
+  "id": "form_0064",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0064.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "8/10/82",
+    "total": null,
+    "title": "COMPOUND PHYSICAL PARAMETERS",
+    "reference": "A30"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "TO",
+    "reference": "A30"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'TO' -> 'COMPOUND PHYSICAL PARAMETERS'",
+    "date: None -> '8/10/82'"
+  ]
+}

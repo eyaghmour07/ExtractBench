@@ -4,10 +4,12 @@ const PIPE_COLS = [
   { key: "vlm-gemini", label: "Gemini", version: "3.5 Flash-Lite" },
 ];
 
-const FIELDS = ["merchant", "date", "total"];
-const FIELD_LABEL = { merchant: "Merchant", date: "Date", total: "Total" };
+const DEFAULT_FIELDS = ["merchant", "date", "total"];
+const DEFAULT_LABELS = { merchant: "Merchant", date: "Date", total: "Total" };
 
 const state = {
+  dataset: "sroie",
+  datasets: [],
   receipts: [],
   selected: new Set(),
   currentId: null,
@@ -35,6 +37,10 @@ const els = {
   pipeVlm: document.getElementById("pipe-vlm"),
   viewLeaderboard: document.getElementById("view-leaderboard"),
   viewGallery: document.getElementById("view-gallery"),
+  datasetNav: document.getElementById("dataset-nav"),
+  brandMeta: document.getElementById("brand-meta"),
+  methodsHead: document.getElementById("methods-head"),
+  labelBox: document.getElementById("label-box"),
 };
 
 function pct(value) {
@@ -71,43 +77,108 @@ function displayOf(pipeline) {
   return PIPE_COLS.find((col) => col.key === pipeline)?.label || pipeline;
 }
 
-async function boot() {
-  const [receiptsRes, boardRes, healthRes] = await Promise.all([
-    fetch("/api/receipts"),
-    fetch("/api/leaderboard"),
-    fetch("/api/health"),
-  ]);
-  const receiptsData = await receiptsRes.json();
-  const board = await boardRes.json();
-  const health = await healthRes.json();
+function currentSpec() {
+  return state.datasets.find((row) => row.id === state.dataset) || {
+    id: state.dataset,
+    fields: DEFAULT_FIELDS,
+    labels: DEFAULT_LABELS,
+    display: state.dataset,
+    accepts_uploads: state.dataset === "personal",
+  };
+}
 
-  state.receipts = receiptsData.receipts || [];
-  state.summaries = board.summaries || [];
-  els.sampleCount.max = Math.max(1, state.receipts.filter((r) => r.has_image).length);
-  const preset = Math.min(Number(els.sampleCount.value) || 8, els.sampleCount.max);
-  els.sampleCount.value = String(preset);
-  selectFirst(preset);
+function fieldNames() {
+  return currentSpec().fields || DEFAULT_FIELDS;
+}
+
+function fieldLabel(name) {
+  return (currentSpec().labels || DEFAULT_LABELS)[name] || name;
+}
+
+async function boot() {
+  const healthRes = await fetch("/api/health");
+  const health = await healthRes.json();
+  state.datasets = health.datasets || [];
   if (!health.vlm_ready) {
     els.pipeVlm.disabled = true;
     els.pipeVlm.closest("label").title = "Set GEMINI_API_KEY in .env to enable Gemini.";
   }
+  renderDatasetNav();
+  await loadDataset(state.dataset, { keepSelection: false });
+}
+
+async function loadDataset(datasetId, { keepSelection } = {}) {
+  state.dataset = datasetId;
+  state.live = {};
+  const [receiptsRes, boardRes] = await Promise.all([
+    fetch(`/api/receipts?dataset=${encodeURIComponent(datasetId)}`),
+    fetch(`/api/leaderboard?dataset=${encodeURIComponent(datasetId)}`),
+  ]);
+  const receiptsData = await receiptsRes.json();
+  const board = await boardRes.json();
+  state.receipts = receiptsData.receipts || [];
+  state.summaries = board.summaries || [];
+  const images = state.receipts.filter((row) => row.has_image).length;
+  els.sampleCount.max = Math.max(1, images);
+  const preset = Math.min(Number(els.sampleCount.value) || 8, els.sampleCount.max);
+  els.sampleCount.value = String(preset);
+  if (!keepSelection) selectFirst(preset);
+  renderDatasetNav();
+  renderHead();
   renderAll();
-  const labeled = health.labeled ?? 0;
-  const images = health.with_image ?? 0;
+  const spec = currentSpec();
+  const labeled = state.receipts.filter((row) => row.scored).length;
   if (images === 0) {
-    setStatus("No receipt images on disk. Run: uv run python scripts/download_sroie.py --n 50");
+    setStatus(spec.download_hint || "No images in this dataset.");
   } else {
-    setStatus(`${labeled} labeled, ${images} with images.`);
+    setStatus(`${spec.display}: ${labeled} labeled, ${images} with images.`);
   }
 }
 
 function renderAll() {
+  const spec = currentSpec();
+  if (els.brandMeta) {
+    els.brandMeta.textContent =
+      spec.id === "sroie"
+        ? "50 labeled SROIE receipts, seed 42"
+        : `${spec.display} · ${spec.doc_type || "document"}`;
+  }
   renderSummary();
   renderMethods();
   renderTabs();
   showCurrent(state.currentId);
   renderCompare();
   renderMeta();
+  renderLabelBox();
+}
+
+function renderDatasetNav() {
+  if (!els.datasetNav) return;
+  els.datasetNav.replaceChildren();
+  for (const spec of state.datasets) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `set${spec.id === state.dataset ? " is-active" : ""}`;
+    btn.textContent = spec.display.replace(" receipts", "").replace(" forms", "");
+    btn.addEventListener("click", () => {
+      if (state.running || spec.id === state.dataset) return;
+      loadDataset(spec.id).catch((err) => setStatus(String(err), true));
+    });
+    els.datasetNav.append(btn);
+  }
+}
+
+function renderHead() {
+  if (!els.methodsHead) return;
+  const names = fieldNames();
+  els.methodsHead.innerHTML = [
+    "<th scope=\"col\">Method</th>",
+    "<th scope=\"col\">P</th>",
+    "<th scope=\"col\">R</th>",
+    "<th scope=\"col\">CER</th>",
+    "<th scope=\"col\">Latency</th>",
+    ...names.map((name) => `<th scope="col">${escapeHtml(fieldLabel(name))}</th>`),
+  ].join("");
 }
 
 function selectFirst(n) {
@@ -193,9 +264,10 @@ function renderMethods() {
   const warnings = [];
   rows.forEach((summary, index) => {
     const tr = document.createElement("tr");
-    const merchant = summary.fields?.merchant?.recall;
-    const date = summary.fields?.date?.recall;
-    const total = summary.fields?.total?.recall;
+    const fieldCells = fieldNames()
+      .map((name) => summary.fields?.[name]?.recall)
+      .map((value) => metricCell(pct(value), false, value))
+      .join("");
     tr.innerHTML = `
       <td>
         <div class="method-cell">
@@ -210,9 +282,7 @@ function renderMethods() {
       ${metricCell(pct(summary.macro_recall), summary.macro_recall === bestR, summary.macro_recall)}
       ${metricCell(num(summary.macro_cer), summary.macro_cer === bestCer)}
       ${metricCell(`${num(summary.latency?.mean_s, 3)} s`, summary.latency?.mean_s === bestLat)}
-      ${metricCell(pct(merchant), false, merchant)}
-      ${metricCell(pct(date), false, date)}
-      ${metricCell(pct(total), false, total)}
+      ${fieldCells}
     `;
     els.methodsBody.append(tr);
     for (const warning of summary.perfect_metric_warnings || []) {
@@ -248,7 +318,8 @@ function renderTabs() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = `receipt-tab${state.currentId === id ? " is-active" : ""}`;
-    btn.innerHTML = `<span class="mono">${escapeHtml(id.replace("train_", "#"))}</span>${escapeHtml(receipt.fields.merchant || id)}`;
+    const headline = receipt.fields[fieldNames()[0]] || id;
+    btn.innerHTML = `<span class="mono">${escapeHtml(id.replace("train_", "#").replace("form_", "#"))}</span>${escapeHtml(headline)}`;
     btn.addEventListener("click", () => {
       state.currentId = id;
       if (!state.selected.has(id)) state.selected.add(id);
@@ -265,7 +336,7 @@ function missIds() {
   const ids = [];
   for (const summary of state.summaries) {
     for (const doc of summary.documents || []) {
-      if (FIELDS.some((name) => doc.fields[name] && !doc.fields[name].match)) {
+      if (fieldNames().some((name) => doc.fields[name] && !doc.fields[name].match)) {
         ids.push(doc.receipt_id);
       }
     }
@@ -284,7 +355,7 @@ function showCurrent(id) {
   els.stageFrame.hidden = false;
   const img = stageImage();
   img.src = receipt.image_url;
-  img.alt = `Receipt ${receipt.id}`;
+  img.alt = `${currentSpec().doc_type || "document"} ${receipt.id}`;
 }
 
 function renderMeta() {
@@ -294,22 +365,23 @@ function renderMeta() {
     els.scoreCard.innerHTML = "";
     return;
   }
+  const names = fieldNames();
   els.metaCard.innerHTML = `
-    <strong>${escapeHtml(receipt.fields.merchant || receipt.id)}</strong>
+    <strong>${escapeHtml(receipt.fields[names[0]] || receipt.id)}</strong>
     <div class="mono">${escapeHtml(receipt.id)} ${receipt.verified ? receipt.fields.date || "" : "unlabeled"}</div>
   `;
   const rows = PIPE_COLS.map((col) => {
     const counts = fieldCounts(col.key);
-    const color = counts.ok === 3 ? "#166534" : counts.ok >= 2 ? "#92400e" : "#9f1239";
-    const width = (counts.ok / 3) * 100;
-    return `<div class="score-row"><span>${escapeHtml(col.label)}</span><div class="score-line"><div class="track"><i style="width:${width}%;background:${color}"></i></div><div class="n" style="color:${color}">${counts.ok}/3</div></div></div>`;
+    const color = counts.ok === names.length ? "#166534" : counts.ok >= 2 ? "#92400e" : "#9f1239";
+    const width = (counts.ok / names.length) * 100;
+    return `<div class="score-row"><span>${escapeHtml(col.label)}</span><div class="score-line"><div class="track"><i style="width:${width}%;background:${color}"></i></div><div class="n" style="color:${color}">${counts.ok}/${names.length}</div></div></div>`;
   }).join("");
   els.scoreCard.innerHTML = `<div class="stat-label">Fields correct</div>${rows}`;
 }
 
 function fieldCounts(pipeline) {
   let ok = 0;
-  for (const field of FIELDS) {
+  for (const field of fieldNames()) {
     const cell = cellFor(pipeline, field);
     if (cell.match) ok += 1;
   }
@@ -335,11 +407,11 @@ function renderCompare() {
   const receipt = state.receipts.find((item) => item.id === state.currentId);
   if (!receipt) return;
   els.compareBody.replaceChildren();
-  for (const field of FIELDS) {
+  for (const field of fieldNames()) {
     const tr = document.createElement("tr");
     const th = document.createElement("th");
     th.scope = "row";
-    th.innerHTML = `${FIELD_LABEL[field]}<small>${escapeHtml(receipt.verified ? receipt.fields[field] || "" : "")}</small>`;
+    th.innerHTML = `${fieldLabel(field)}<small>${escapeHtml(receipt.verified ? receipt.fields[field] || "" : "")}</small>`;
     tr.append(th);
     for (const col of PIPE_COLS) {
       const td = document.createElement("td");
@@ -405,7 +477,7 @@ els.form.addEventListener("submit", async (event) => {
     const response = await fetch("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pipelines, ids }),
+      body: JSON.stringify({ pipelines, ids, dataset: state.dataset }),
     });
     if (response.status === 409) {
       setStatus("A scan is already running.", true);
@@ -514,7 +586,12 @@ async function onUpload(file) {
   if (!file) return;
   const body = new FormData();
   body.append("file", file);
-  const response = await fetch("/api/uploads", { method: "POST", body });
+  const spec = currentSpec();
+  if (!spec.accepts_uploads) {
+    setStatus("Switch to Personal receipts to add your own images.", true);
+    return;
+  }
+  const response = await fetch(`/api/uploads?dataset=${encodeURIComponent(spec.id)}`, { method: "POST", body });
   if (!response.ok) {
     setStatus("Upload failed. Use JPEG, PNG, or WebP.", true);
     return;
@@ -524,8 +601,51 @@ async function onUpload(file) {
   state.selected.add(item.id);
   state.currentId = item.id;
   renderAll();
-  setStatus(`${item.id} added. Unlabeled uploads extract only.`);
+  setStatus(`${item.id} added. Label it from the image before it can enter the leaderboard.`);
 }
+
+function renderLabelBox() {
+  if (!els.labelBox) return;
+  const receipt = state.receipts.find((item) => item.id === state.currentId);
+  const spec = currentSpec();
+  if (!receipt || receipt.verified || spec.id === "sroie") {
+    els.labelBox.hidden = true;
+    els.labelBox.innerHTML = "";
+    return;
+  }
+  els.labelBox.hidden = false;
+  els.labelBox.innerHTML = fieldNames()
+    .map(
+      (name) =>
+        `<label>${escapeHtml(fieldLabel(name))}<input name="${escapeHtml(name)}" value="${escapeHtml(receipt.fields[name] || "")}" /></label>`
+    )
+    .join("") + `<button type="submit">Save label</button>`;
+}
+
+els.labelBox?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const receipt = state.receipts.find((item) => item.id === state.currentId);
+  if (!receipt) return;
+  const fields = {};
+  for (const name of fieldNames()) {
+    fields[name] = els.labelBox.elements[name]?.value?.trim() || "";
+  }
+  const response = await fetch("/api/labels", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dataset: state.dataset, id: receipt.id, fields }),
+  });
+  if (!response.ok) {
+    setStatus((await response.text()) || "Could not save label.", true);
+    return;
+  }
+  const item = await response.json();
+  const index = state.receipts.findIndex((row) => row.id === item.id);
+  if (index >= 0) state.receipts[index] = item;
+  else state.receipts.push(item);
+  renderAll();
+  setStatus(`${item.id} labeled. It can enter the ${currentSpec().display} leaderboard.`);
+});
 
 document.querySelectorAll('input[type="file"]').forEach((input) => {
   input.addEventListener("change", async () => {

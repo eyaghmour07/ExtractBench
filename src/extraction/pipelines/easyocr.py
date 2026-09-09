@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
-from extraction.parse import parse_receipt_text
+from extraction.parse import parse_document
 from extraction.schema import PipelineRun, ReceiptFields
 
 
@@ -20,13 +20,13 @@ class EasyOcrPipeline:
             self._reader = easyocr.Reader(["en"], gpu=False, verbose=False)
         return self._reader
 
-    def extract(self, image_path: Path, receipt_id: str) -> PipelineRun:
+    def extract(self, image_path: Path, receipt_id: str, doc_type: str = "receipt") -> PipelineRun:
         started = time.perf_counter()
         try:
             rows = self._get_reader().readtext(str(image_path), detail=1, paragraph=False)
             # EasyOCR returns (bbox, text, conf); keep reading order.
             raw = "\n".join(str(row[1]) for row in rows)
-            fields = parse_receipt_text(raw)
+            fields = parse_document(raw, doc_type)
             error = None
         except Exception as exc:  # noqa: BLE001
             raw = None

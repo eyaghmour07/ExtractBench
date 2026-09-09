@@ -15,9 +15,13 @@ build/
 .DS_Store
 *.swp
 
-# Receipt images and pipeline run artifacts (labels are committed)
+# Images and pipeline run artifacts (labels are committed)
 data/receipts/*
 !data/receipts/.gitkeep
+data/personal/images/*
+!data/personal/images/.gitkeep
+data/forms/images/*
+!data/forms/images/.gitkeep
 data/runs/*
 !data/runs/.gitkeep
 

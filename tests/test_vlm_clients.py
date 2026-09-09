@@ -6,9 +6,9 @@ from extraction.pipelines.vlm_clients import AnthropicClient, OpenAIClient, list
 def test_openai_and_claude_are_explicit_stubs(tmp_path):
     dummy = tmp_path / "x.jpg"
     dummy.write_bytes(b"not-an-image")
-    with pytest.raises(NotImplementedError, match="Phase 3"):
+    with pytest.raises(NotImplementedError, match="free"):
         OpenAIClient().extract_fields(dummy)
-    with pytest.raises(NotImplementedError, match="Phase 3"):
+    with pytest.raises(NotImplementedError, match="free"):
         AnthropicClient().extract_fields(dummy)
 
 

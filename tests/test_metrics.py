@@ -67,6 +67,25 @@ def test_summarize_runs_flags_perfect_scores():
     assert any("100%" in w or "CER is 0" in w for w in summary["perfect_metric_warnings"])
 
 
+def test_fields_match_title_like_merchant():
+    assert fields_match("title", "Dept. of Health", "DEPT OF HEALTH")
+    assert fields_match("reference", "4412-A", "4412a")
+    assert not fields_match("title", "Dept of Health", "Dept of Revenue")
+
+
+def test_summarize_runs_form_fields():
+    gt = {"f1": ReceiptFields(title="LICENSE APPLICATION", date="01/01/1986", reference="12-AB")}
+    run = PipelineRun(
+        pipeline="tesseract",
+        receipt_id="f1",
+        fields=ReceiptFields(title="LICENSE APPLICATION", date="01/01/1986", reference="12-AB"),
+        latency_s=0.4,
+    )
+    summary = summarize_runs([run], gt, ("title", "date", "reference"))
+    assert set(summary["fields"]) == {"title", "date", "reference"}
+    assert summary["macro_precision"] == 1.0
+
+
 def test_summarize_runs_partial_miss():
     gt = {"r1": ReceiptFields(merchant="ACME SDN BHD", date="25/12/2018", total="9.00")}
     run = PipelineRun(

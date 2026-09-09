@@ -8,9 +8,11 @@ import re
 from dateutil import parser as date_parser
 from Levenshtein import distance as levenshtein_distance
 
+from extraction.catalog import RECEIPT_FIELDS
 from extraction.schema import PipelineRun, ReceiptFields
 
-FIELD_NAMES = ("merchant", "date", "total")
+FIELD_NAMES = RECEIPT_FIELDS
+TEXT_FIELDS = {"merchant", "title", "reference", "authors"}
 
 
 def normalize_merchant(value: str | None) -> str | None:
@@ -66,8 +68,16 @@ def character_error_rate(gt: str | None, pred: str | None) -> float:
     return levenshtein_distance(gt_n, pred_n) / max(len(gt_n), 1)
 
 
+def normalize_reference(value: str | None) -> str | None:
+    text = normalize_merchant(value)
+    return text.replace(" ", "") if text else None
+
+
 def fields_match(name: str, gt: str | None, pred: str | None) -> bool:
-    if name == "merchant":
+    if name == "reference":
+        left, right = normalize_reference(gt), normalize_reference(pred)
+        return left is not None and left == right
+    if name in TEXT_FIELDS:
         left, right = normalize_merchant(gt), normalize_merchant(pred)
         return left is not None and left == right
     if name == "date":
@@ -111,8 +121,9 @@ def recall(tp: int, fn: int) -> float | None:
 def summarize_runs(
     runs: list[PipelineRun],
     ground_truth: dict[str, ReceiptFields],
+    field_names: tuple[str, ...] = FIELD_NAMES,
 ) -> dict:
-    per_field = {name: {"tp": 0, "fp": 0, "fn": 0, "cers": []} for name in FIELD_NAMES}
+    per_field = {name: {"tp": 0, "fp": 0, "fn": 0, "cers": []} for name in field_names}
     latencies: list[float] = []
     list_cost = 0.0
     billed_cost = 0.0
@@ -127,7 +138,7 @@ def summarize_runs(
         if run.error:
             errors += 1
         doc_fields = {}
-        for name in FIELD_NAMES:
+        for name in field_names:
             gt_val = getattr(gt, name)
             pred_val = getattr(run.fields, name)
             counts = score_field(gt_val, pred_val, name)

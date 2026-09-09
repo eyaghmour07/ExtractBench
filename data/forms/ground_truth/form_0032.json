@@ -1,0 +1,28 @@
+{
+  "id": "form_0032",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0032.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "10/9/87",
+    "total": null,
+    "title": "MARKET RESEARCH AUTHORIZATION",
+    "reference": "C-40"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "Projected:",
+    "reference": "40"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'Projected:' -> 'MARKET RESEARCH AUTHORIZATION'",
+    "date: None -> '10/9/87'",
+    "reference: '40' -> 'C-40'"
+  ]
+}

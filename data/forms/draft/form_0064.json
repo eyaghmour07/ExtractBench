@@ -1,0 +1,12 @@
+{
+  "id": "form_0064",
+  "dataset_index": 64,
+  "hf_id": "64",
+  "fields": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "TO",
+    "reference": "A30"
+  }
+}

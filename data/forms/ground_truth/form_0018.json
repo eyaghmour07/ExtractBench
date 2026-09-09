@@ -1,0 +1,26 @@
+{
+  "id": "form_0018",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0018.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "September 21, 1976",
+    "total": null,
+    "title": "Sample Specifications",
+    "reference": "6030"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": "September 21, 1976",
+    "total": null,
+    "title": "Cigarettes",
+    "reference": "6030"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'Cigarettes' -> 'Sample Specifications'"
+  ]
+}

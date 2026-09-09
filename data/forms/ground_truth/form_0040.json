@@ -1,0 +1,26 @@
+{
+  "id": "form_0040",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0040.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "April 30, 1985",
+    "total": null,
+    "title": "PROJECT INITIATION FORM",
+    "reference": "PMRM"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": "April 30, 1985",
+    "total": null,
+    "title": "PROJECT INITIATION FORM",
+    "reference": "30"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "reference: '30' -> 'PMRM'"
+  ]
+}

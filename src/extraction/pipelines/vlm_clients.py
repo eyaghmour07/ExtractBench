@@ -5,7 +5,8 @@ import time
 from pathlib import Path
 from typing import Protocol
 
-from extraction.schema import ReceiptFields
+from extraction.catalog import DOC_TYPES
+from extraction.schema import FormFields, ReceiptFields, ReceiptTargets
 
 # Published Gemini 3.5 Flash-Lite paid rates (USD / million tokens). Used as list
 # price even when the free tier bills $0, so cost-per-document is comparable.
@@ -18,7 +19,7 @@ class VlmClient(Protocol):
     name: str
     model: str
 
-    def extract_fields(self, image_path: Path) -> VlmResponse: ...
+    def extract_fields(self, image_path: Path, doc_type: str = "receipt") -> VlmResponse: ...
 
 
 class VlmResponse:
@@ -47,9 +48,10 @@ class OpenAIClient:
     def __init__(self) -> None:
         self.model = os.environ.get("OPENAI_MODEL", "gpt-4o")
 
-    def extract_fields(self, image_path: Path) -> VlmResponse:
+    def extract_fields(self, image_path: Path, doc_type: str = "receipt") -> VlmResponse:
         raise NotImplementedError(
-            "OpenAI GPT-4o is a Phase 3 drop-in. Implement VlmClient.extract_fields."
+            "OpenAI GPT-4o is not wired: the API has no free tier. ExtractBench only "
+            "runs hosted VLMs that can bill $0."
         )
 
 
@@ -59,9 +61,10 @@ class AnthropicClient:
     def __init__(self) -> None:
         self.model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
-    def extract_fields(self, image_path: Path) -> VlmResponse:
+    def extract_fields(self, image_path: Path, doc_type: str = "receipt") -> VlmResponse:
         raise NotImplementedError(
-            "Claude vision is a Phase 3 drop-in. Implement VlmClient.extract_fields."
+            "Claude vision is not wired: the API has no ongoing free tier. ExtractBench "
+            "only runs hosted VLMs that can bill $0."
         )
 
 
@@ -84,16 +87,13 @@ class GeminiClient:
             self._client = genai.Client(api_key=self.api_key)
         return self._client
 
-    def extract_fields(self, image_path: Path) -> VlmResponse:
+    def extract_fields(self, image_path: Path, doc_type: str = "receipt") -> VlmResponse:
         from google.genai import types
 
         mime = _image_mime(image_path)
         image_bytes = image_path.read_bytes()
-        prompt = (
-            "Extract the merchant (store / company name), transaction date, and grand total "
-            "from this receipt image. Use the printed total the customer paid, not subtotal "
-            "or change. Return JSON only. If a field is unreadable, use null."
-        )
+        schema = FormFields if doc_type == "form" else ReceiptTargets
+        prompt = DOC_TYPES[doc_type]["vlm_prompt"]
         response = self._get_client().models.generate_content(
             model=self.model,
             contents=[
@@ -102,7 +102,7 @@ class GeminiClient:
             ],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                response_schema=ReceiptFields,
+                response_schema=schema,
             ),
         )
         usage = getattr(response, "usage_metadata", None)

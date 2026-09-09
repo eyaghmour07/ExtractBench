@@ -1,28 +1,55 @@
 # ExtractBench
 
-Compare **Tesseract**, **EasyOCR**, and a **Gemini** vision-language model on the same hand-labeled receipts. The referee is ground truth verified from the image — never a pipeline output, and never an unverified SROIE JSON dump.
+Compare **Tesseract**, **EasyOCR**, and a **Gemini** vision-language model on the same hand-labeled documents. The referee is ground truth verified from the image — never a pipeline output, and never an unverified dataset JSON dump.
 
-v1 fields: **merchant**, **date**, **total**. Dataset: [ICDAR 2019 SROIE](https://huggingface.co/datasets/jsdnrs/ICDAR2019-SROIE) (CC-BY-4.0). Frozen 50-id slice in `data/manifest.json` (train split, seed 42).
+Receipt fields: **merchant**, **date**, **total**. Primary set: [ICDAR 2019 SROIE](https://huggingface.co/datasets/jsdnrs/ICDAR2019-SROIE) (CC-BY-4.0), frozen 50-id train slice in `data/manifest.json` (seed 42).
 
-This is its own data point. Septiawan et al. (2025) compared GPT-4o to EasyOCR+LLaMA. Default here is Gemini plus a deterministic OCR parser, not that setup.
+This is its own data point. Septiawan et al. (2025) compared GPT-4o to EasyOCR+LLaMA. Default here is Gemini plus a deterministic OCR parser, not that setup. GPT-4o and Claude stay unimplemented: neither API has an ongoing free tier.
 
 ## Latest numbers (50 verified receipts)
 
-Gemini **3.5 Flash-Lite** (image → JSON) vs Tesseract/EasyOCR + the same regex parser. Not a Septiawan reproduction: that paper used GPT-4o vs EasyOCR+LLaMA.
+Gemini **3.5 Flash-Lite** (image → JSON) vs Tesseract/EasyOCR + the same regex parser.
 
-| Pipeline | Docs | Macro P | Macro R | Macro CER | Latency mean (s) | List cost (USD) | Billed (USD) |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| tesseract | 50 | 59.2% | 48.0% | 0.362 | 0.514 | 0.0000 | 0.0000 |
-| easyocr | 50 | 53.1% | 47.3% | 0.353 | 5.711 | 0.0000 | 0.0000 |
-| vlm-gemini | 50 | 96.7% | 96.7% | 0.027 | 9.866 | 0.0226 | 0.0000 |
+| Pipeline | Macro P | Macro R | Macro CER | Latency mean (s) |
+| --- | ---: | ---: | ---: | ---: |
+| tesseract | 59.2% | 48.0% | 0.362 | 0.514 |
+| easyocr | 53.1% | 47.3% | 0.353 | 5.711 |
+| vlm-gemini | 96.7% | 96.7% | 0.027 | 9.866 |
 
-Gemini wins every accuracy axis. EasyOCR is the best **date** OCR engine (84% recall vs Tesseract 62%) but the worst **total** picker (24%). Tesseract is faster (0.5s vs 5.7s vs 9.9s). Gemini list price for this run is **$0.0226**; billed was $0 on the free tier.
+Gemini wins every accuracy axis. EasyOCR is the best **date** OCR engine (84% recall vs Tesseract 62%) but the worst **total** picker (24%). Tesseract is faster (0.5s vs 5.7s vs 9.9s). Gemini list price for this run is **$0.0226**; billed was $0 on the free tier. Full cost columns live in [results/leaderboard.md](results/leaderboard.md).
 
 Gemini **date** is 50/50 — the code flagged that 100% as a cue to inspect labels, not a trophy. Dates on these receipts are unambiguous printed fields, so a strong VLM can actually clear them. Merchant is 46/50: the four misses are brand name vs legal entity (IKEA vs IKANO HANDEL, myNEWS.com vs MYNEWS RETAIL SB, SUSHI MENTAI vs MIZU MENTAI, BHPetrol vs ESJAY FUEL). One total miss is 20.80 vs 20.90 (rounding).
 
-Full table + side-by-side misses: [results/leaderboard.md](results/leaderboard.md), [results/failure_gallery.md](results/failure_gallery.md).
+Side-by-side misses: [results/failure_gallery.md](results/failure_gallery.md).
 
 One SROIE draft was wrong on the image and was corrected: `train_0414` merchant `UHAT` → `UBAT`.
+
+## Other datasets
+
+Two more sets share the same engines and scoring. Their leaderboards never mix into the locked SROIE table.
+
+**Personal receipts** — same merchant / date / total fields. Upload your own images, label them from the picture, then scan. Unlabeled uploads extract only.
+
+**FUNSD forms** — `title`, `date`, `reference`. Frozen 10-id slice ([nielsr/funsd-layoutlmv3](https://huggingface.co/datasets/nielsr/funsd-layoutlmv3), seed 42), labels written from the images. A first Tesseract pass is **0% exact-match** ([results/funsd_leaderboard.md](results/funsd_leaderboard.md)). The receipt parser does not transfer; that is the generalization result.
+
+```bash
+uv run python scripts/download_funsd.py --n 10
+uv run python scripts/run_benchmark.py --dataset funsd --pipelines tesseract,easyocr,vlm --n 10
+```
+
+## Web bench
+
+A printed table is the score. The UI is how you check that the score is about the documents, not the spreadsheet.
+
+```bash
+uv run python scripts/serve.py
+```
+
+Open http://127.0.0.1:8765.
+
+The bench lets you switch SROIE / personal / forms, pick pipelines, and watch a scan fill the leaderboard and failure gallery as each document finishes. Clicking a miss shows the image next to every engine’s prediction and the hand label — that is the only way to see brand-vs-legal-name errors, a 20.80 vs 20.90 total, or a form title the receipt parser never finds. Personal receipts are labeled in the same view, so the referee stays tied to the image instead of a JSON file you never opened.
+
+Gemini is skipped unless `GEMINI_API_KEY` is set in `.env`.
 
 ## Setup
 
@@ -46,10 +73,12 @@ After you have looked at an image you can write a label non-interactively:
 ```bash
 uv run python scripts/label.py --write-verified train_0042 --from-draft --notes "matches image"
 uv run python scripts/label.py --write-verified train_0042 \
-  --merchant "FOO SDN BHD" --date 25/12/2018 --total 9.00
+    --merchant "FOO SDN BHD" --date 25/12/2018 --total 9.00
+uv run python scripts/label.py --dataset personal --write-verified my-lunch \
+    --merchant "CAFE" --date 08/09/2026 --total 12.40
 ```
 
-## Run
+## CLI
 
 By-eye Tesseract loop (no aggregate table):
 
@@ -63,21 +92,13 @@ All three pipelines + comparison table (VLM is skipped if no API key):
 uv run python scripts/run_benchmark.py --pipelines tesseract,easyocr,vlm --n 50
 ```
 
-Writes `data/runs/` (gitignored) and copies the table to `results/`.
-
-Live bench UI (upload, run, leaderboard, failure gallery):
-
-```bash
-uv run python scripts/serve.py
-```
-
-Open http://127.0.0.1:8765. Gemini is skipped unless `GEMINI_API_KEY` is set in `.env`. Unlabeled uploads extract only; they do not enter the leaderboard.
+Writes `data/runs/` (gitignored) and copies the table to `results/`. Pass `--dataset personal` or `--dataset funsd` for the other boards.
 
 ## What the numbers mean
 
 | Number | Meaning |
 | --- | --- |
-| Field precision / recall | Exact match after normalization (date → calendar date, total → cents, merchant → casefold + punctuation stripped). Wrong prediction is both an FP and an FN. |
+| Field precision / recall | Exact match after normalization (date → calendar date, total → cents, merchant / title / reference → casefold + punctuation stripped). Wrong prediction is both an FP and an FN. |
 | CER | Mean Levenshtein / max(len(gt), 1) on casefolded, whitespace-squeezed strings. Near-misses that P/R treats as total failures. |
 | Latency | Wall-clock seconds per document. Local OCR cost is time, not $0. |
 | List cost | Gemini token usage × published paid rates ($0.30/M input, $2.50/M output for 3.5 Flash-Lite), even on the free tier. |
@@ -85,7 +106,7 @@ Open http://127.0.0.1:8765. Gemini is skipped unless `GEMINI_API_KEY` is set in 
 
 A 100% score on any metric prints a warning. Treat that as a cue to inspect labels, not a result.
 
-OCR pipelines share `parse.py` (regex/heuristics). The VLM is image → JSON. GPT-4o and Claude clients exist as `NotImplementedError` stubs behind the same `VlmClient` protocol.
+OCR pipelines share `parse.py` (regex/heuristics), dispatched by document type. The VLM is image → JSON.
 
 ## Tests
 

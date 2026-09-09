@@ -22,9 +22,10 @@
           <span class="mark" aria-hidden="true">E</span>
           <div>
             <h1>ExtractBench</h1>
-            <p class="brand-meta">50 labeled SROIE receipts, seed 42</p>
+            <p class="brand-meta" id="brand-meta">50 labeled SROIE receipts, seed 42</p>
           </div>
         </div>
+        <nav class="sets" id="dataset-nav" aria-label="Datasets"></nav>
         <nav class="tabs" aria-label="Views">
           <button type="button" class="tab is-active" data-view="leaderboard">Leaderboard</button>
           <button type="button" class="tab" data-view="gallery">Failure gallery</button>
@@ -46,7 +47,7 @@
         <div class="board">
           <table class="methods" id="methods">
             <thead>
-              <tr>
+              <tr id="methods-head">
                 <th scope="col">Method</th>
                 <th scope="col">P</th>
                 <th scope="col">R</th>
@@ -83,6 +84,7 @@
               </div>
             </div>
             <div class="meta-card" id="meta-card"></div>
+            <form class="label-box" id="label-box" hidden></form>
             <div class="score-card" id="score-card"></div>
           </aside>
           <div class="compare-wrap">

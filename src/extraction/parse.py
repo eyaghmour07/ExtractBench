@@ -46,6 +46,14 @@ _DATE = re.compile(
 )
 
 
+def parse_document(text: str, doc_type: str = "receipt") -> ReceiptFields:
+    if doc_type == "form":
+        return parse_form_text(text)
+    if doc_type == "receipt":
+        return parse_receipt_text(text)
+    raise ValueError(f"Unknown document type {doc_type!r}")
+
+
 def parse_receipt_text(text: str) -> ReceiptFields:
     lines = _nonzero_lines(text)
     return ReceiptFields(
@@ -53,6 +61,65 @@ def parse_receipt_text(text: str) -> ReceiptFields:
         date=_parse_date(lines, text),
         total=_parse_total(lines),
     )
+
+
+_FORM_SKIP = re.compile(
+    r"^(confidential|draft|see\s+reverse|page\s+\d+|continued|internal\s+use)\b",
+    re.I,
+)
+_REF_LABEL = re.compile(
+    r"\b(form\s*(no|number|#)|file\s*(no|number|#)|ref(?:erence)?(\s*(no|number|#))?|"
+    r"registration\s*(no|number|#)|serial(\s*(no|number|#))?|id\s*(no|number)?)\b",
+    re.I,
+)
+_REF_VALUE = re.compile(r"\b([A-Z]{0,4}\d[\dA-Z./-]{1,16})\b")
+
+
+def parse_form_text(text: str) -> ReceiptFields:
+    lines = _nonzero_lines(text)
+    return ReceiptFields(
+        title=_parse_form_title(lines),
+        date=_parse_date(lines, text),
+        reference=_parse_reference(lines),
+    )
+
+
+def _parse_form_title(lines: list[str]) -> str | None:
+    picked: list[str] = []
+    for line in lines[:16]:
+        if _FORM_SKIP.match(line) or _PHONE_OR_FAX.match(line) or _MOSTLY_DIGITS.match(line):
+            if picked:
+                break
+            continue
+        if _looks_like_date_line(line) or _REF_LABEL.search(line):
+            if picked:
+                break
+            continue
+        if not _has_letters(line, min_letters=4):
+            continue
+        picked.append(line)
+        if len(picked) >= 2 or _looks_complete_company(line):
+            break
+    return " ".join(picked) if picked else None
+
+
+def _parse_reference(lines: list[str]) -> str | None:
+    labeled: list[str] = []
+    unlabeled: list[str] = []
+    for line in lines[:24]:
+        match = _REF_VALUE.search(line)
+        if not match:
+            continue
+        value = match.group(1).strip(" ./")
+        if _REF_LABEL.search(line):
+            labeled.append(value)
+        elif not _DATE.search(line):
+            unlabeled.append(value)
+    if labeled:
+        return labeled[0]
+    if unlabeled:
+        return unlabeled[0]
+    return None
 
 
 def _nonzero_lines(text: str) -> list[str]:

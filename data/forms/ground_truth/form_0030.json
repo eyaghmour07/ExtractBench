@@ -1,0 +1,28 @@
+{
+  "id": "form_0030",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0030.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "12/5/89",
+    "total": null,
+    "title": "Formula Composit Form",
+    "reference": "SKGC-4518"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "AARBERG -STRAHAN INKS & COATINGS CORP.",
+    "reference": "1989"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'AARBERG -STRAHAN INKS & COATINGS CORP.' -> 'Formula Composit Form'",
+    "date: None -> '12/5/89'",
+    "reference: '1989' -> 'SKGC-4518'"
+  ]
+}

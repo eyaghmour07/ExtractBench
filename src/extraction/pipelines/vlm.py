@@ -26,13 +26,13 @@ class VlmPipeline:
         self.on_call = on_call
         self._last_call_at = 0.0
 
-    def extract(self, image_path: Path, receipt_id: str) -> PipelineRun:
+    def extract(self, image_path: Path, receipt_id: str, doc_type: str = "receipt") -> PipelineRun:
         started = time.perf_counter()
         last_error: str | None = None
         for attempt in range(self.max_retries):
             self._respect_rate_limit()
             try:
-                result = self.client.extract_fields(image_path)
+                result = self.client.extract_fields(image_path, doc_type=doc_type)
                 self._last_call_at = time.monotonic()
                 if self.on_call is not None:
                     self.on_call(

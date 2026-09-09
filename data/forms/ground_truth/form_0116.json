@@ -1,0 +1,26 @@
+{
+  "id": "form_0116",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0116.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "April 27, 1981",
+    "total": null,
+    "title": "MARKETING RESEARCH PROJECT APPROVAL",
+    "reference": "5546/1481"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": "April 27, 1981",
+    "total": null,
+    "title": "MARKETING RESEARCH PROJECT APPROVAL",
+    "reference": "27"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "reference: '27' -> '5546/1481'"
+  ]
+}

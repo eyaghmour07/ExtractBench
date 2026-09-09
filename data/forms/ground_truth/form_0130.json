@@ -1,0 +1,28 @@
+{
+  "id": "form_0130",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0130.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "May 1992",
+    "total": null,
+    "title": "TRUE $3.00 CARTON COUPON PROMOTION",
+    "reference": null
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": null,
+    "total": null,
+    "title": "PACKING",
+    "reference": "1992"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "title: 'PACKING' -> 'TRUE $3.00 CARTON COUPON PROMOTION'",
+    "date: None -> 'May 1992'",
+    "reference: '1992' -> None"
+  ]
+}

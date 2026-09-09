@@ -4,20 +4,38 @@ from pydantic import BaseModel, Field
 
 
 class ReceiptFields(BaseModel):
-    """The three v1 extraction targets. All optional so a pipeline can miss a field."""
+    """Extracted fields. Receipts use merchant/date/total; forms use title/date/reference."""
+
+    merchant: str | None = None
+    date: str | None = None
+    total: str | None = None
+    title: str | None = None
+    reference: str | None = None
+
+
+class ReceiptTargets(BaseModel):
+    """VLM JSON schema for receipts. Kept separate so Gemini is not asked for form fields."""
 
     merchant: str | None = None
     date: str | None = None
     total: str | None = None
 
 
+class FormFields(BaseModel):
+    title: str | None = None
+    date: str | None = None
+    reference: str | None = None
+
+
 class GroundTruthRecord(BaseModel):
     id: str
     source: str = "sroie"
+    doc_type: str = "receipt"
     image: str
     fields: ReceiptFields
     verified: bool = False
     sroie_draft: ReceiptFields | None = None
+    draft: ReceiptFields | None = None
     notes: str | None = None
     corrections: list[str] = Field(default_factory=list)
 
@@ -38,3 +56,4 @@ class Manifest(BaseModel):
     split: str
     seed: int
     ids: list[str]
+    doc_type: str = "receipt"

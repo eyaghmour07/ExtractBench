@@ -1,0 +1,27 @@
+{
+  "id": "form_0125",
+  "source": "funsd",
+  "doc_type": "form",
+  "image": "data/forms/images/form_0125.jpg",
+  "fields": {
+    "merchant": null,
+    "date": "8/06/93",
+    "total": null,
+    "title": "COUPON CODE REGISTRATION FORM",
+    "reference": "8470"
+  },
+  "verified": true,
+  "sroie_draft": null,
+  "draft": {
+    "merchant": null,
+    "date": "10/11/93",
+    "total": null,
+    "title": "COUPON CODE REGISTRATION FORM",
+    "reference": "10/11/93"
+  },
+  "notes": "labeled from the form image",
+  "corrections": [
+    "date: '10/11/93' -> '8/06/93'",
+    "reference: '10/11/93' -> '8470'"
+  ]
+}

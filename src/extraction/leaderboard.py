@@ -6,6 +6,12 @@ from extraction.metrics import FIELD_NAMES
 from extraction.paths import RECEIPTS
 
 
+def _field_names(summaries: list[dict]) -> tuple[str, ...]:
+    if summaries and summaries[0].get("fields"):
+        return tuple(summaries[0]["fields"].keys())
+    return FIELD_NAMES
+
+
 def render_leaderboard(summaries: list[dict]) -> str:
     lines = [
         "| Pipeline | Docs | Macro P | Macro R | Macro CER | Latency mean (s) | List cost (USD) | Billed (USD) |",
@@ -30,7 +36,7 @@ def render_leaderboard(summaries: list[dict]) -> str:
     lines.append("| Pipeline | Field | P | R | CER | TP | FP | FN |")
     lines.append("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |")
     for summary in summaries:
-        for name in FIELD_NAMES:
+        for name in _field_names(summaries):
             row = summary["fields"][name]
             lines.append(
                 f"| {summary['pipeline']} | {name} | {_pct(row['precision'])} | "
@@ -56,13 +62,19 @@ def render_leaderboard(summaries: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_failure_gallery(summaries: list[dict], limit_per_pipeline: int = 8) -> str:
+def render_failure_gallery(
+    summaries: list[dict],
+    limit_per_pipeline: int = 8,
+    image_dir: Path | None = None,
+) -> str:
+    names = _field_names(summaries)
+    root = image_dir or RECEIPTS
     lines = ["# Failure gallery", ""]
     for summary in summaries:
         misses = [
             doc
             for doc in summary["documents"]
-            if any(not doc["fields"][name]["match"] for name in FIELD_NAMES)
+            if any(not doc["fields"][name]["match"] for name in names)
         ]
         lines.append(f"## {summary['pipeline']} ({len(misses)} documents with at least one miss)")
         lines.append("")
@@ -73,18 +85,18 @@ def render_failure_gallery(summaries: list[dict], limit_per_pipeline: int = 8) -
         # Worst first: most missed fields, then highest mean CER.
         misses.sort(
             key=lambda doc: (
-                -sum(0 if doc["fields"][n]["match"] else 1 for n in FIELD_NAMES),
-                -sum(doc["fields"][n]["cer"] for n in FIELD_NAMES),
+                -sum(0 if doc["fields"][n]["match"] else 1 for n in names),
+                -sum(doc["fields"][n]["cer"] for n in names),
             )
         )
         for doc in misses[:limit_per_pipeline]:
-            image = RECEIPTS / f"{doc['receipt_id']}.jpg"
+            image = root / f"{doc['receipt_id']}.jpg"
             lines.append(f"### {doc['receipt_id']}")
             lines.append("")
             lines.append(f"- image: `{_rel(image)}`")
             if doc["error"]:
                 lines.append(f"- error: {doc['error']}")
-            for name in FIELD_NAMES:
+            for name in names:
                 cell = doc["fields"][name]
                 mark = "ok" if cell["match"] else "MISS"
                 lines.append(
